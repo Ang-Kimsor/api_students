@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student CRUD with Modals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <h1 class="text-2xl font-bold mb-6">Student CRUD with Modals</h1>
+
+    <!-- Table -->
+    <table class="w-full bg-white shadow mb-6">
+      <thead class="bg-gray-200">
+        <tr>
+          <!-- <th class="p-2">Image</th> -->
+          <th class="p-2">Name</th>
+          <th class="p-2">Email</th>
+          <th class="p-2">Gender</th>
+          <th class="p-2">DOB</th>
+          <th class="p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody id="students"></tbody>
+    </table>
+
+    <!-- Buttons -->
+    <button
+      onclick="openAddModal()"
+      class="bg-green-500 text-white px-4 py-2 rounded mb-4"
+    >
+      Add Student
+    </button>
+
+    <!-- Add Modal -->
+    <div
+      id="addModal"
+      class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded shadow w-96 relative">
+        <h2 class="text-xl font-bold mb-4">Add Student</h2>
+        <div class="space-y-2">
+          <input id="add_name" class="border p-2 w-full" placeholder="Name" />
+          <input id="add_email" class="border p-2 w-full" placeholder="Email" />
+          <input
+            id="add_gender"
+            class="border p-2 w-full"
+            placeholder="Male / Female"
+          />
+          <input id="add_dob" type="date" class="border p-2 w-full" />
+          <input
+            id="add_image"
+            class="border p-2 w-full"
+            placeholder="Image URL"
+          />
+        </div>
+        <div class="mt-4 flex justify-end space-x-2">
+          <button
+            onclick="closeAddModal()"
+            class="px-4 py-2 bg-gray-300 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="addStudent()"
+            class="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+        <span
+          onclick="closeAddModal()"
+          class="absolute top-2 right-3 cursor-pointer text-gray-500"
+          >&times;</span
+        >
+      </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div
+      id="updateModal"
+      class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded shadow w-96 relative">
+        <h2 class="text-xl font-bold mb-4">Update Student</h2>
+        <div class="space-y-2">
+          <input type="hidden" id="update_id" />
+          <input
+            id="update_name"
+            class="border p-2 w-full"
+            placeholder="Name"
+          />
+          <input
+            id="update_email"
+            class="border p-2 w-full"
+            placeholder="Email"
+          />
+          <input
+            id="update_gender"
+            class="border p-2 w-full"
+            placeholder="Male / Female"
+          />
+          <input id="update_dob" type="date" class="border p-2 w-full" />
+          <input
+            id="update_image"
+            class="border p-2 w-full"
+            placeholder="Image URL"
+          />
+        </div>
+        <div class="mt-4 flex justify-end space-x-2">
+          <button
+            onclick="closeUpdateModal()"
+            class="px-4 py-2 bg-gray-300 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="updateStudent()"
+            class="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Update
+          </button>
+        </div>
+        <span
+          onclick="closeUpdateModal()"
+          class="absolute top-2 right-3 cursor-pointer text-gray-500"
+          >&times;</span
+        >
+      </div>
+    </div>
+
+    <script>
+      // const API = "http://localhost/1.%20PHP/API%20Teaching/api.php";
+      const API =
+        "https://cors-anywhere.herokuapp.com/https://studentapi.infinityfreeapp.com/api.php";
+
+      /*
+      <td class="p-2"><img src="${
+            s.image
+          }" class="w-10 h-10 rounded-full mx-auto"></td>
+      */
+      /* =======================
+   Load Students
+======================= */
+      function loadStudents() {
+        fetch(API)
+          .then((res) => res.json())
+          .then((data) => {
+            students.innerHTML = "";
+            data.forEach((s) => {
+              students.innerHTML += `
+        <tr class="border-b text-center">
+          
+          <td>${s.name}</td>
+          <td>${s.email}</td>
+          <td>${s.gender}</td>
+          <td>${s.dob}</td>
+          <td>
+            <button onclick='openUpdateModal(${JSON.stringify(
+              s
+            )})' class="text-blue-600">Edit</button>
+            |
+            <button onclick='deleteStudent(${
+              s.id
+            })' class="text-red-600">Delete</button>
+          </td>
+        </tr>`;
+            });
+          });
+      }
+
+      /* =======================
+   Add Modal
+======================= */
+      function openAddModal() {
+        document.getElementById("addModal").classList.remove("hidden");
+      }
+      function closeAddModal() {
+        document.getElementById("addModal").classList.add("hidden");
+      }
+
+      /* Add Student */
+      function addStudent() {
+        const student = {
+          name: document.getElementById("add_name").value,
+          email: document.getElementById("add_email").value,
+          gender: document.getElementById("add_gender").value,
+          dob: document.getElementById("add_dob").value,
+          image: document.getElementById("add_image").value,
+        };
+        fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(student),
+        }).then(() => {
+          closeAddModal();
+          clearAddForm();
+          loadStudents();
+        });
+      }
+      function clearAddForm() {
+        document.getElementById("add_name").value = "";
+        document.getElementById("add_email").value = "";
+        document.getElementById("add_gender").value = "";
+        document.getElementById("add_dob").value = "";
+        document.getElementById("add_image").value = "";
+      }
+
+      /* =======================
+   Update Modal
+======================= */
+      function openUpdateModal(s) {
+        document.getElementById("updateModal").classList.remove("hidden");
+        document.getElementById("update_id").value = s.id;
+        document.getElementById("update_name").value = s.name;
+        document.getElementById("update_email").value = s.email;
+        document.getElementById("update_gender").value = s.gender;
+        document.getElementById("update_dob").value = s.dob;
+        document.getElementById("update_image").value = s.image;
+      }
+      function closeUpdateModal() {
+        document.getElementById("updateModal").classList.add("hidden");
+      }
+
+      /* Update Student */
+      function updateStudent() {
+        const student = {
+          id: document.getElementById("update_id").value,
+          name: document.getElementById("update_name").value,
+          email: document.getElementById("update_email").value,
+          gender: document.getElementById("update_gender").value,
+          dob: document.getElementById("update_dob").value,
+          image: document.getElementById("update_image").value,
+        };
+        fetch(API, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(student),
+        }).then(() => {
+          closeUpdateModal();
+          loadStudents();
+        });
+      }
+
+      /* Delete Student */
+      function deleteStudent(id) {
+        if (!confirm("Are you sure you want to delete this student?")) return;
+        fetch(API, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        }).then(loadStudents);
+      }
+
+      /* Load on start */
+      loadStudents();
+    </script>
+  </body>
+</html>
