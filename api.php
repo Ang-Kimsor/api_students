@@ -9,69 +9,61 @@ require "db.php";
 $method = $_SERVER["REQUEST_METHOD"];
 
 /* ======================
-   GET: Fetch Students
+GET: Fetch Students
 ====================== */
 if ($method === "GET") {
-    $stmt = $pdo->query("SELECT * FROM students");
+    $stmt = $pdo->query("SELECT id,name,email,gender,dob FROM students");
     echo json_encode($stmt->fetchAll());
     exit;
 }
 
 /* ======================
-   POST: Add Student
+POST: Add Student
 ====================== */
 if ($method === "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
-
     $stmt = $pdo->prepare(
-        "INSERT INTO students (name,email,gender,dob,image)
-         VALUES (?,?,?,?,?)"
+        "INSERT INTO students (name,email,gender,dob)
+        VALUES (?,?,?,?)"
     );
     $stmt->execute([
         $data["name"],
         $data["email"],
         $data["gender"],
-        $data["dob"],
-        $data["image"]
+        $data["dob"]
     ]);
-
     echo json_encode(["message" => "Student added"]);
     exit;
 }
 
 /* ======================
-   PUT: Update Student
+PUT: Update Student
 ====================== */
 if ($method === "PUT") {
     $data = json_decode(file_get_contents("php://input"), true);
-
     $stmt = $pdo->prepare(
         "UPDATE students
-         SET name=?, email=?, gender=?, dob=?, image=?
-         WHERE id=?"
+        SET name=?, email=?, gender=?, dob=?
+        WHERE id=?"
     );
     $stmt->execute([
         $data["name"],
         $data["email"],
         $data["gender"],
         $data["dob"],
-        $data["image"],
         $data["id"]
     ]);
-
     echo json_encode(["message" => "Student updated"]);
     exit;
 }
 
 /* ======================
-   DELETE: Delete Student
+DELETE: Delete Student
 ====================== */
 if ($method === "DELETE") {
     $data = json_decode(file_get_contents("php://input"), true);
-
     $stmt = $pdo->prepare("DELETE FROM students WHERE id=?");
     $stmt->execute([$data["id"]]);
-
     echo json_encode(["message" => "Student deleted"]);
     exit;
 }
